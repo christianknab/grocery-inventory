@@ -1,5 +1,5 @@
 const dotenv = require("dotenv");
-const AnyList = require("../anylist-api/anylist/lib/index");
+const AnyList = require("../../anylist/lib/index");
 
 dotenv.config();
 
@@ -13,15 +13,18 @@ any.login().then(async () => {
 
   const shared_list = any.getListByName("Shared grocery list");
   const favorite_items = any.getFavoriteItemsByListId(shared_list.identifier);
-  // for (const item of favorite_items) {
-  //   console.log(item.name);
-  // }
-  let item = favorite_items.getItemByName("campanelle");
-  console.log(item);
-  // let garlic = shared_list.getItemByName("Rice Krispies");
-  // console.log(garlic);
-  // garlic.details = "1 heads 8/3";
-  // await garlic.save();
+
+  let existing_item = favorite_items.getItemByName("ANYLIST API TEST");
+  existing_item.details = "updated detail 1";
+  await existing_item.save(isFavorite=true);
+  
+  let test_add = any.createItem({name: 'test4', category: 'other'});
+  await favorite_items.addItem(test_add, true);
+
+  let test_delete = favorite_items.getItemByName("test4");
+  await favorite_items.removeItem(test_delete, true);
+
   // Clean up
   any.teardown();
+  process.exit(0); // Explicitly exit the process
 });
