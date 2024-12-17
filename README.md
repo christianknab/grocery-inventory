@@ -18,6 +18,10 @@ The project needs to be broken down into multiple parts:
 
 Currently, I am thinking of buying a barcode scanner to scan the item (so no phone needs to be taken out of pocket), identify the product name with a **barcode database** (https://www.barcodelookup.com/api ??), then... ->
 
+Thinking about using https://rapidapi.com/bigproductdata/api/big-product-data
+
+This is better probably: https://upcdatabase.org/api
+
 ### Anylist app integration
 
 ... identify the item in our AnyList shopping list, update the quantity there.
