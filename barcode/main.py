@@ -20,6 +20,7 @@ def main():
 
     while True:
         # Scan barcode
+        operation = scanner.choose_operation()
         barcode = scanner.scan_barcode()
 
         # Validate barcode
@@ -49,6 +50,7 @@ def main():
                     }
 
                     # Check if the item is in the list
+                    # probably log the name somewhere for ease of debugging
                     name, item_id = database.get_similar_item(product_name)
 
                     if item_id:
@@ -59,6 +61,10 @@ def main():
                     
                     if inserted_product:
                         print(f"New product added: {product_data}")
+                        # update product quantity. this will trigger a function to update the anylist item
+                        updated_product = database.update_quantity(1 if operation == 1 else -1)
+                        if updated_product:
+                            print(f"Product modified {1 if operation == 1 else -1}: {updated_product}")
                 else:
                     print("Could not retrieve product information.")
 

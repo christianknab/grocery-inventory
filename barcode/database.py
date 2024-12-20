@@ -44,9 +44,9 @@ class InventoryDatabase:
             return None
     
     def get_similar_item(self, product_name: str) -> tuple[str, str]:
-        # returns name, anylist_identifier
+        '''returns name, inventory_identifier'''
         def find_similar_item(items):
-            # returns the name, anylist_identifier
+            # returns the name, inventory_identifier
             names = [item['name'] for item in items]
             best_match = extract_similar_item(product_name, names)
 
@@ -58,7 +58,7 @@ class InventoryDatabase:
             return None, None
 
         def get_inventory_items():
-            # return all favorites the name, anylist_identifier
+            '''return all favorites the name, inventory_identifier'''
             try:
                 response = self.client.table('inventory').select('name, id').execute()
                 return response.data
@@ -70,14 +70,14 @@ class InventoryDatabase:
         if items is None:
             return None, None
         return find_similar_item(items)
-        
-    # def update_inventory_description(self, id: str, description: str) -> bool:
-    #     try:
-    #         self.client.table('inventory').update({'description': description}).eq('id', id).execute()
-    #         return True
-    #     except Exception as e:
-    #         print(f"db update error: {e}")
-    #         return False
+
+    def update_quantity(self, item_id, amount):
+        '''increment or decrement the quantity'''
+        try:
+            response = self.client.rpc('update_quantity', {'item_id': item_id, 'amount': amount}).execute()
+            print(f'changed quantity: {item_id}')
+        except Exception as e:
+            print(f'inventory quantity update error {e}')
 
 def main():
     database = InventoryDatabase(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
@@ -88,8 +88,8 @@ def main():
     # response = database.insert_barcode_entry(product_data)
     # print(response)
 
-    name, anylist_identifier = database.get_similar_item(" Yamaimo Buckwheat Soba Noodles, with Yam, 10.58 Oz ")
-    print(name, anylist_identifier)
+    name, item_id = database.get_similar_item("pumpkin pie")
+    # database.update_quantity(item_id, -1)
     
 
 if __name__ == "__main__":
