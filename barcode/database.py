@@ -3,9 +3,9 @@ from supabase import create_client, Client
 from typing import Dict, Optional
 from similarity import extract_similar_item
 
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
-load_dotenv()
+# load_dotenv()
 
 class InventoryDatabase:
     def __init__(self, url: str, key: str):
