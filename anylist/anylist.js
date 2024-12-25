@@ -8,7 +8,7 @@ function sortItems(favorite_items) {
     if (!acc[category]) {
       acc[category] = [];
     }
-    acc[category].push({'name': item._name, 'id': item._identifier});
+    acc[category].push({ 'name': item._name, 'id': item._identifier });
     return acc;
   }, {});
 
@@ -18,6 +18,48 @@ function sortItems(favorite_items) {
     items.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
     items.forEach(item => console.log(`"${item['name']}",${category},0,${item['id']}`));
   }
+}
+
+function updateText(text, expected_quantity) {
+  // Get current date
+  const today = new Date();
+  const currentMonth = today.toLocaleString("en-US", {
+    timeZone: "America/Los_Angeles",
+    month: "2-digit"
+  });
+  const currentDay = today.toLocaleString("en-US", {
+    timeZone: "America/Los_Angeles",
+    day: "2-digit"
+  });
+  const currentDate = `${currentMonth}/${currentDay}`;
+
+  // Extract the current quantity and noun
+  const pattern = /(\d+)\s+(\w+)\s+(\d{1,2}\/\d{1,2})/;
+  const match = text.match(pattern);
+
+  if (!match) {
+    return null;
+  }
+
+  // Get the current quantity and increment it
+  const currentQuantity = parseInt(match[1]);
+  const newQuantity = currentQuantity + 1;
+  const noun = match[2];
+
+  // Replace the old text with new values
+  const updatedText = text.replace(
+    pattern,
+    `${newQuantity} ${noun} ${currentDate}`
+  );
+
+  return updatedText;
+}
+
+function updateItem(favorite_items, anylist_identifier) {
+  let existing_item = favorite_items.getItemById(anylist_identifier);
+  console.log(existing_item.details);
+  let updated_text = updateText(existing_item.details);
+  console.log(updated_text);
 }
 
 dotenv.config();
@@ -32,9 +74,9 @@ any.login().then(async () => {
 
   const shared_list = any.getListByName("Shared grocery list");
   const favorite_items = any.getFavoriteItemsByListId(shared_list.identifier);
-
+  updateItem(favorite_items, '6a6ec1f358734b7283d57a49b9483b11');
   // console.log(favorite_items['items']);
-  sortItems(favorite_items);
+  // sortItems(favorite_items);
 
   // let existing_item = favorite_items.getItemByName("ANYLIST API TEST");
   // existing_item.details = "updated detail 1";
