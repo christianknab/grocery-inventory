@@ -3,20 +3,24 @@ const AnyList = require("../../anylist/lib/index");
 
 function sortItems(favorite_items) {
   // Group items by category
-  const groupedItems = favorite_items['items'].reduce((acc, item) => {
+  const groupedItems = favorite_items["items"].reduce((acc, item) => {
     const category = item._categoryMatchId;
     if (!acc[category]) {
       acc[category] = [];
     }
-    acc[category].push({ 'name': item._name, 'id': item._identifier });
+    acc[category].push({ name: item._name, id: item._identifier });
     return acc;
   }, {});
 
   // Print categories and their items alphabetically
   for (const [category, items] of Object.entries(groupedItems)) {
     // Sort items alphabetically
-    items.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
-    items.forEach(item => console.log(`"${item['name']}",${category},0,${item['id']}`));
+    items.sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+    );
+    items.forEach((item) =>
+      console.log(`"${item["name"]}",${category},0,${item["id"]}`),
+    );
   }
 }
 
@@ -25,11 +29,11 @@ function updateText(text, expected_quantity) {
   const today = new Date();
   const currentMonth = today.toLocaleString("en-US", {
     timeZone: "America/Los_Angeles",
-    month: "2-digit"
+    month: "2-digit",
   });
   const currentDay = today.toLocaleString("en-US", {
     timeZone: "America/Los_Angeles",
-    day: "2-digit"
+    day: "2-digit",
   });
   const currentDate = `${currentMonth}/${currentDay}`;
 
@@ -49,7 +53,7 @@ function updateText(text, expected_quantity) {
   // Replace the old text with new values
   const updatedText = text.replace(
     pattern,
-    `${newQuantity} ${noun} ${currentDate}`
+    `${newQuantity} ${noun} ${currentDate}`,
   );
 
   return updatedText;
@@ -74,7 +78,7 @@ any.login().then(async () => {
 
   const shared_list = any.getListByName("Shared grocery list");
   const favorite_items = any.getFavoriteItemsByListId(shared_list.identifier);
-  updateItem(favorite_items, '6a6ec1f358734b7283d57a49b9483b11');
+  updateItem(favorite_items, "6a6ec1f358734b7283d57a49b9483b11");
   // console.log(favorite_items['items']);
   // sortItems(favorite_items);
 
