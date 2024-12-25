@@ -49,12 +49,17 @@ function updateText(text, expected_quantity) {
   const currentQuantity = parseInt(match[1]);
   const newQuantity = currentQuantity + 1;
   const noun = match[2];
+  var updatedText = "";
 
-  // Replace the old text with new values
-  const updatedText = text.replace(
-    pattern,
-    `${newQuantity} ${noun} ${currentDate}`,
-  );
+  if (currentQuantity == expected_quantity) {
+    // Replace the old text with new values
+    updatedText = text.replace(
+      pattern,
+      `${newQuantity} ${noun} ${currentDate}`,
+    );
+  } else {
+    updatedText = text;
+  }
 
   return updatedText;
 }
