@@ -21,7 +21,8 @@ def main():
     while True:
         # Scan barcode
         operation = scanner.choose_operation()
-        barcode = scanner.scan_barcode()
+        # barcode = scanner.scan_barcode()
+        barcode = "038000045301"
 
         # Validate barcode
         if not scanner.validate_barcode(barcode):
@@ -31,9 +32,11 @@ def main():
         try:
             # Check if barcode exists in database
             existing_product = database.get_barcode_entry(barcode)
+            item_id = None
 
             if existing_product:
                 # Barcode exists, update description or handle as needed
+                item_id = existing_product['item_id']
                 print(f"Product found: {existing_product}")
                 
             else:
@@ -67,15 +70,20 @@ def main():
                             print(f"Product modified {1 if operation == 1 else -1}: {updated_product}")
                 else:
                     print("Could not retrieve product information.")
+            
+            # get anylist identifier and call js function
+            item = database.get_inventory_item(id=item_id)
+            print(item['anylist_identifier'])
+            
 
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
 
         # Ask user to continue or exit
-        should_continue = input("Scan another barcode? (y/n): ").lower()
-        if should_continue != 'y':
-            print("Exiting...")
-            break
+        # should_continue = input("Scan another barcode? (y/n): ").lower()
+        # if should_continue != 'y':
+        #     print("Exiting...")
+        #     break
 
 if __name__ == "__main__":
     main()

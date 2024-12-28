@@ -28,14 +28,14 @@ class InventoryDatabase:
             return None
     
     def get_inventory_item(self, id: str = None, name: str = None):
-        reponse = None
+        response = None
         if id:
-            reponse = self.client.table('inventory').select('*').eq('id', id).execute()
+            response = self.client.table('inventory').select('*').eq('id', id).execute()
         elif name:
-            reponse = self.client.table('inventory').select('*').eq('name', name).execute()
-        return reponse
+            response = self.client.table('inventory').select('*').eq('name', name).execute()
+        return response.data[0] if response.data else None
     
-    def insert_inventory_itme(self, inventory_item: Dict) -> Optional[Dict]:
+    def insert_inventory_item(self, inventory_item: Dict) -> Optional[Dict]:
         try:
             response = self.client.table('inventory').insert(inventory_item).execute()
             return response.data[0] if response.data else None
@@ -88,7 +88,7 @@ def main():
     # response = database.insert_barcode_entry(product_data)
     # print(response)
 
-    name, item_id = database.get_similar_item("pumpkin pie")
+    # name, item_id = database.get_similar_item("pumpkin pie")
     # database.update_quantity(item_id, -1)
     
 
