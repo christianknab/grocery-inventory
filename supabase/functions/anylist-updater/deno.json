@@ -1,0 +1,6 @@
+{
+    "imports": {
+      "anylist": "npm:https://raw.githubusercontent.com/christianknab/anylist/refs/heads/master/lib/index.js",
+      "anylist_file": "file:../../../anylist/ https://raw.githubusercontent.com/christianknab/anylist/refs/heads/master/lib/index.js"
+    }
+  }

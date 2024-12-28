@@ -250,13 +250,13 @@ policy = "oneshot"
 inspector_port = 8083
 
 # Use these configurations to customize your Edge Function.
-# [functions.MY_FUNCTION_NAME]
+[functions.anylist-updater]
 # enabled = true
 # verify_jwt = true
 # import_map = "./functions/MY_FUNCTION_NAME/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
-# entrypoint = "./functions/MY_FUNCTION_NAME/index.ts"
+entrypoint = "./functions/anylist-updater/index.js"
 
 [analytics]
 enabled = true
