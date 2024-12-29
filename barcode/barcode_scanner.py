@@ -1,8 +1,23 @@
+from led_controller import LEDController
+from operation import Operation
+
 class BarcodeScanner:
-    def __init__(self):
-        # possible inits for an actual barcode scanner???
-        self.operation = Operation.INSERT
-        pass
+    def __init__(self, led_controller: LEDController):
+        self._operation = Operation.INSERT
+        self.led_controller = led_controller
+        self._update_leds()  # Initial LED state
+
+    @property
+    def operation(self):
+        return self._operation
+
+    @operation.setter
+    def operation(self, value):
+        self._operation = value
+        self._update_leds()
+
+    def _update_leds(self):
+        self.led_controller.update_leds(self._operation)
 
     def barcode_reader(self):
         """Barcode code obtained from 'brechmos' 
@@ -54,10 +69,8 @@ class BarcodeScanner:
     def scan_barcode(self) -> str:
         barcode = self.barcode_reader()
         if barcode == '000000000000':
-            # TODO change the light on rbpi
             self.choose_operation(Operation.REMOVE)
         elif barcode == '111111111111':
-            # TODO change the light on rbpi - maybe this is just set to self.operation value
             self.choose_operation(Operation.INSERT)
         return barcode
     
@@ -70,9 +83,3 @@ class BarcodeScanner:
     def validate_barcode(self, barcode: str) -> bool:
         print(barcode.isdigit(), len(barcode) == 12)
         return barcode.isdigit() and len(barcode) == 12
-    
-from enum import Enum
-
-class Operation(Enum):
-    INSERT = 1
-    REMOVE = 0
