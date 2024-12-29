@@ -1,6 +1,7 @@
 from barcode_api import BarcodeAPI
 from barcode_scanner import BarcodeScanner
 from database import InventoryDatabase
+from anylist_updater_queue import AnylistUpdaterQueue
 import os
 from dotenv import load_dotenv
 
@@ -17,13 +18,14 @@ def main():
     scanner = BarcodeScanner()
     api_client = BarcodeAPI(api_key=RAPIDAPI_KEY, api_host=RAPIDAPI_HOST)
     database = InventoryDatabase(url=SUPABASE_URL, key=SUPABASE_KEY)
+    anylist_updater_queue = AnylistUpdaterQueue()
 
     while True:
         # Scan barcode
         operation = scanner.choose_operation()
-        # barcode = scanner.scan_barcode()
-        barcode = "038000045301"
-
+        barcode = scanner.scan_barcode()
+        print(barcode)
+        
         # Validate barcode
         if not scanner.validate_barcode(barcode):
             print("Invalid barcode. Please try again.")
@@ -62,20 +64,21 @@ def main():
                     # Insert new product into database
                     inserted_product = database.insert_barcode_entry(product_data)
                     
-                    if inserted_product:
-                        print(f"New product added: {product_data}")
-                        # update product quantity. this will trigger a function to update the anylist item
-                        updated_product = database.update_quantity(1 if operation == 1 else -1)
-                        if updated_product:
-                            print(f"Product modified {1 if operation == 1 else -1}: {updated_product}")
+                    # if inserted_product:
+                    #     print(f"New product added: {product_data}")
+                    #     # update product quantity. this will trigger a function to update the anylist item
+                        
+                    #     updated_product = database.update_quantity(1 if operation == 1 else -1)
+                    #     if updated_product:
+                    #         print(f"Product modified {1 if operation == 1 else -1}: {updated_product}")
                 else:
                     print("Could not retrieve product information.")
             
             # get anylist identifier and call js function
-            item = database.get_inventory_item(id=item_id)
-            print(item['anylist_identifier'])
+            if item_id:
+                item = database.get_inventory_item(id=item_id)
+                anylist_updater_queue.add_to_queue(item['anylist_identifier'], 1 if operation == 1 else -1)
             
-
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
 

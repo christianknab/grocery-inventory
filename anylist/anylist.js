@@ -38,7 +38,7 @@ function updateText(text, expected_quantity) {
   const currentDate = `${currentMonth}/${currentDay}`;
 
   // Extract the current quantity and noun
-  const pattern = /(\d+)\s+(\w+)\s+(\d{1,2}\/\d{1,2})/;
+  const pattern = /(\d+)\s+(\D+)?\s?(\d{1,2}\/\d{1,2})/;
   const match = text.match(pattern);
 
   if (!match) {
@@ -48,7 +48,7 @@ function updateText(text, expected_quantity) {
   // Get the current quantity and increment it
   const currentQuantity = parseInt(match[1]);
   const newQuantity = currentQuantity + 1;
-  const noun = match[2];
+  const noun = match[2] ?? '';
   var updatedText = "";
 
   if (currentQuantity == expected_quantity) {

@@ -4,7 +4,7 @@ class BarcodeScanner:
         self.operation = Operation.INSERT
         pass
 
-    def barcode_reader():
+    def barcode_reader(self):
         """Barcode code obtained from 'brechmos' 
         https://www.raspberrypi.org/forums/viewtopic.php?f=45&t=55100"""
         hid = {4: 'a', 5: 'b', 6: 'c', 7: 'd', 8: 'e', 9: 'f', 10: 'g', 11: 'h', 12: 'i', 13: 'j', 14: 'k', 15: 'l', 16: 'm',
@@ -52,7 +52,7 @@ class BarcodeScanner:
         return ss
 
     def scan_barcode(self) -> str:
-        barcode = barcode_reader()
+        barcode = self.barcode_reader()
         return barcode
     
     def choose_operation(self):
