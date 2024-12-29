@@ -53,12 +53,19 @@ class BarcodeScanner:
 
     def scan_barcode(self) -> str:
         barcode = self.barcode_reader()
+        if barcode == '000000000000':
+            # TODO change the light on rbpi
+            self.choose_operation(Operation.REMOVE)
+        elif barcode == '111111111111':
+            # TODO change the light on rbpi - maybe this is just set to self.operation value
+            self.choose_operation(Operation.INSERT)
         return barcode
     
-    def choose_operation(self):
-        op = input("Choose operation - 0 (DELETE), 1 (REMOVE): ").strip()
-        self.operation = Operation.INSERT if op == '1' else Operation.REMOVE
-        return self.operation.value
+    def choose_operation(self, operation):
+        # op = input("Choose operation - 0 (REMOVE), 1 (ADD): ").strip()
+        # self.operation = Operation.INSERT if op == '1' else Operation.REMOVE
+        self.operation = operation
+        # return self.operation.value
 
     def validate_barcode(self, barcode: str) -> bool:
         print(barcode.isdigit(), len(barcode) == 12)

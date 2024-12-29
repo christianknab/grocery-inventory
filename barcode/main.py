@@ -1,5 +1,5 @@
 from barcode_api import BarcodeAPI
-from barcode_scanner import BarcodeScanner
+from barcode_scanner import BarcodeScanner, Operation
 from database import InventoryDatabase
 from anylist_updater_queue import AnylistUpdaterQueue
 import os
@@ -22,9 +22,12 @@ def main():
 
     while True:
         # Scan barcode
-        operation = scanner.choose_operation()
+        # operation = scanner.choose_operation()
         barcode = scanner.scan_barcode()
         print(barcode)
+        # Check if setup barcode
+        if barcode == '000000000000' or barcode == '111111111111':
+            continue
         
         # Validate barcode
         if not scanner.validate_barcode(barcode):
@@ -76,8 +79,9 @@ def main():
             
             # get anylist identifier and call js function
             if item_id:
+                print(scanner.operation)
                 item = database.get_inventory_item(id=item_id)
-                anylist_updater_queue.add_to_queue(item['anylist_identifier'], 1 if operation == 1 else -1)
+                anylist_updater_queue.add_to_queue(item['anylist_identifier'], 1 if scanner.operation == Operation.INSERT else -1)
             
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
