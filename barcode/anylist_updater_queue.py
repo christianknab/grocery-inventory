@@ -2,19 +2,21 @@ import time
 import subprocess
 import threading
 import queue
+import json
 
 import os
 from dotenv import load_dotenv
 load_dotenv()
 
 class AnylistUpdaterQueue:
-    def __init__(self):
+    def __init__(self, display):
         self.task_queue = queue.Queue()
         self.NODE_PATH = os.getenv("NODE_PATH")
         self.ANYLIST_PACKAGE_PATH = os.getenv("ANYLIST_PACKAGE_PATH")
         self.lock = threading.Lock()
         self.worker_thread = threading.Thread(target=self._worker, daemon=True)
         self.worker_thread.start()
+        self.display = display
 
     def add_to_queue(self, item_id, quantity):
         # Add task to queue
@@ -32,7 +34,7 @@ class AnylistUpdaterQueue:
     def _call_js_script(self, item_id, quantity):
         # Run Node.js script
         command = [self.NODE_PATH, self.ANYLIST_PACKAGE_PATH, str(item_id), str(quantity)]
-        print("THREAD LAUNCHING:::", item_id, quantity)
+        # print("THREAD LAUNCHING:::", item_id, quantity)
         process = subprocess.Popen(
             command,
             stdout=subprocess.PIPE,
@@ -41,10 +43,23 @@ class AnylistUpdaterQueue:
         )
         # Wait for process to finish before proceeding
         stdout, stderr = process.communicate()
+
         if stderr:
             print(f"[JS ERROR] {stderr.strip()}")
-        else:
-            print(f"[JS OUTPUT] {stdout.strip()}")
+            self.display.draw_image(body=f"JS Error: {stderr.strip()}")
+            return
+
+        try:
+            response = json.loads(stdout)
+            if response['status'] == 'success':
+                print(f"[JS OUTPUT] Item: {response['itemName']} | Old Qty: {response['oldQuantity']} | New Qty: {response['newQuantity']}")
+                self.display.draw_image(body=f"{response['itemName']}\n{response['oldQuantity']} -> {response['newQuantity']}")
+            else:
+                print(f"[JS ERROR] {response['message']}")
+                self.display.draw_image(body="Error:" + response['message'])
+        except json.JSONDecodeError:
+            print("Failed to parse JS output.")
+            self.display.draw_image(body="Error:" + "Failed to parse JS output.")
         
 # queue = AnylistUpdaterQueue()
 # queue.add_to_queue("c9bd57c0bee24caeb5bfbde5241831ce", 1)

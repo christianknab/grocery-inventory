@@ -45,29 +45,39 @@ function updateText(text, quantity) {
     updatedText = text;
   }
 
-  return updatedText;
+  return { updatedText, newQuantity, currentQuantity };
 }
 
 async function updateItem(favorite_items, shared_list, anylist_identifier, quantity) {
-  // updating favorite item
-  let existing_item = favorite_items.getItemById(anylist_identifier);
-  console.log(existing_item.name, existing_item.details);
-  let updated_text = updateText(existing_item.details, quantity);
-  console.log(updated_text);
-  if (updateText == null) {
-    return;
+  try {
+    let existing_item = favorite_items.getItemById(anylist_identifier);
+    let updateResult = updateText(existing_item.details, quantity);
+    
+    if (!updateResult) {
+      throw new Error("Failed to match item details format.");
+    }
+    
+    existing_item.details = updateResult.updatedText;
+    await existing_item.save(true);
+
+    let duplicate_item = shared_list.getItemByName(existing_item.name);
+    if (duplicate_item) {
+      duplicate_item.details = updateResult.updatedText;
+      await duplicate_item.save();
+    }
+
+    console.log(JSON.stringify({
+      status: "success",
+      itemName: existing_item.name,
+      newQuantity: updateResult.newQuantity,
+      oldQuantity: updateResult.currentQuantity
+    }));
+  } catch (error) {
+    console.log(JSON.stringify({
+      status: "error",
+      message: error.message
+    }));
   }
-  existing_item.details = updated_text;
-  await existing_item.save(isFavorite = true);
-  // check if favorite item in list
-  // this is technically an edge case...
-  // if there is an item in the list that is named exactly the same, there will be a conflict
-  let duplicate_item = shared_list.getItemByName(existing_item.name);
-  if (duplicate_item) {
-    duplicate_item.details = updated_text;
-    await duplicate_item.save();
-  }
-  return;
 }
 
 function updater(barcode, quantity) {
@@ -77,16 +87,21 @@ function updater(barcode, quantity) {
     password: process.env.ANYLIST_PWD,
   });
 
-  any.login(connectWebSocket = false).then(async () => {
+  any.login(false).then(async () => {
     await any.getLists();
 
     const shared_list = any.getListByName(listName);
     const favorite_items = any.getFavoriteItemsByListId(shared_list.identifier);
     await updateItem(favorite_items, shared_list, anylist_identifier, quantity);
-    // await item.save(isFavorite = true);
-    // Clean up
+
     any.teardown();
-    process.exit(0); // Explicitly exit the process
+    process.exit(0);
+  }).catch((err) => {
+    console.log(JSON.stringify({
+      status: "error",
+      message: "Failed to login or retrieve lists."
+    }));
+    process.exit(1);
   });
 }
 
