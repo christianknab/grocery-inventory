@@ -15,3 +15,5 @@ https://www.quora.com/How-do-I-keep-a-script-running-on-Raspberry-Pi-after-termi
 
 probably want to use nohup
 
+### Display resources
+https://learn.adafruit.com/monochrome-oled-breakouts/python-usage-2
