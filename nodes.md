@@ -8,12 +8,9 @@ https://www.amazon.com/Raspberry-Quad-core-Bluetooth-onboard-Antenna/dp/B0CCRP85
 https://www.amazon.com/RS-Components-Raspberry-Pi-Motherboard/dp/B07BFH96M3?source=ps-sl-shoppingads-lpcontext&ref_=fplfs&psc=1&smid=A1JX327N91FZPX&gQT=2
 
 ### running scripts in the background
-
-https://blog.scphillips.com/posts/2013/07/getting-a-python-script-to-run-in-the-background-as-a-service-on-boot/
-https://forums.raspberrypi.com/viewtopic.php?t=10154
-https://www.quora.com/How-do-I-keep-a-script-running-on-Raspberry-Pi-after-terminating-the-SSH-connection
-
-probably want to use nohup
+Use systemmd
+https://www.dexterindustries.com/howto/run-a-program-on-your-raspberry-pi-at-startup/
 
 ### Display resources
 https://learn.adafruit.com/monochrome-oled-breakouts/python-usage-2
+

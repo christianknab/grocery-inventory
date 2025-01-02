@@ -13,7 +13,7 @@ from operation import Operation
 from dotenv import load_dotenv
 
 # Setup logging
-LOG_DIR = 'logs'
+LOG_DIR = '/home/knab-server/grocery-inventory/logs'
 LOG_FILE_NAME = 'application.log'
 RETENTION_DAYS = 7
 os.makedirs(LOG_DIR, exist_ok=True)
