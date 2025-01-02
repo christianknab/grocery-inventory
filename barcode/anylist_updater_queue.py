@@ -58,7 +58,7 @@ class AnylistUpdaterQueue:
                 print(f"[JS ERROR] {response['message']}")
                 self.display.draw_image(body="Error:" + response['message'])
         except json.JSONDecodeError:
-            print("Failed to parse JS output.")
+            print(f"Failed to parse JS output: {stdout}")
             self.display.draw_image(body="Error:" + "Failed to parse JS output.")
         
 # queue = AnylistUpdaterQueue()

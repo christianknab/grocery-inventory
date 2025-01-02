@@ -19,9 +19,7 @@ function updateText(text, quantity) {
     day: "2-digit",
   });
   const currentDate = `${currentMonth}/${currentDay}`;
-
-  // Extract the current quantity and noun
-  const pattern = /(\d+)\s+(\D+)?\s?(\d{1,2}\/\d{1,2})/;
+  const pattern = /((?:^|\n|\s)(\d+)(\s+[a-zA-Z]+)?\s*(\d{1,2}\/\d{1,2}))/;
   const match = text.match(pattern);
 
   if (!match) {
@@ -29,18 +27,21 @@ function updateText(text, quantity) {
   }
 
   // Get the current quantity and increment it
-  const currentQuantity = parseInt(match[1]);
+  const fullMatch = match[1];  // full match with any space/newline padding
+  const currentQuantity = parseInt(match[2], 10);
+  const noun = match[3] || ''; // noun optional
+
   const newQuantity = currentQuantity + quantity;
-  const noun = match[2];
+
+  // Maintain original spacing/newlines
   var updatedText = "";
 
   if (newQuantity > 0) {
-    // Replace the old text with new values
-    const spacing = noun ? ` ${noun} ` : ' ';
-    updatedText = text.replace(
-      pattern,
-      `${newQuantity}${spacing}${currentDate}`,
+    const updatedString = fullMatch.replace(
+      /(\d+)(\s+[a-zA-Z]+)?\s*(\d{1,2}\/\d{1,2})/,
+      `${newQuantity}${noun} ${currentDate}`
     );
+    updatedText = text.replace(fullMatch, updatedString);
   } else {
     updatedText = text;
   }
@@ -52,11 +53,11 @@ async function updateItem(favorite_items, shared_list, anylist_identifier, quant
   try {
     let existing_item = favorite_items.getItemById(anylist_identifier);
     let updateResult = updateText(existing_item.details, quantity);
-    
+
     if (!updateResult) {
       throw new Error("Failed to match item details format.");
     }
-    
+
     existing_item.details = updateResult.updatedText;
     await existing_item.save(true);
 
@@ -81,7 +82,7 @@ async function updateItem(favorite_items, shared_list, anylist_identifier, quant
 }
 
 function updater(barcode, quantity) {
-  dotenv.config({path:path.resolve(__dirname, '../anylist/.env')});
+  dotenv.config({ path: path.resolve(__dirname, '../anylist/.env') });
   const any = new AnyList({
     email: process.env.ANYLIST_EMAIL,
     password: process.env.ANYLIST_PWD,
