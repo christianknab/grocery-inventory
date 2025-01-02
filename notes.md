@@ -14,3 +14,53 @@ https://www.dexterindustries.com/howto/run-a-program-on-your-raspberry-pi-at-sta
 ### Display resources
 https://learn.adafruit.com/monochrome-oled-breakouts/python-usage-2
 
+### systemmd file
+
+Edit file
+`sudo vim /etc/systemd/system/inventory-runner.service`
+
+```
+[Unit]
+Description=Grocery Inventory Runner
+After=network.target
+
+[Service]
+ExecStart=/home/knab-server/grocery-inventory/inventory-runner.sh
+WorkingDirectory=/home/knab-server/grocery-inventory
+User=knab-server
+Restart=always
+RestartSec=10
+StartLimitInterval=60
+StartLimitBurst=3
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Reload and enable the service
+```
+sudo systemctl daemon-reload
+sudo systemctl enable inventory-runner.service
+```
+Start the service
+```
+sudo systemctl start inventory-runner.service
+```
+Verify the service is running
+```
+sudo systemctl status inventory-runner.service
+```
+Check journal
+```
+journalctl -u inventory-runner.service
+```
+Stop service
+```
+sudo systemctl stop inventory-runner.service
+```
+Disable service
+```
+sudo systemctl disable inventory-runner.service
+```
