@@ -19,7 +19,7 @@ function updateText(text, quantity) {
     day: "2-digit",
   });
   const currentDate = `${currentMonth}/${currentDay}`;
-  const pattern = /((?:^|\n|\s)(\d+)(\s+[a-zA-Z]+)?\s*(\d{1,2}\/\d{1,2}))/;
+  const pattern = /((?:^|\n|\s)(\d+)(\s+[a-zA-Z]+)?\s+(\d{1,2}\/\d{1,2}))/;
   const match = text.match(pattern);
 
   if (!match) {
@@ -55,7 +55,7 @@ async function updateItem(favorite_items, shared_list, anylist_identifier, quant
     let updateResult = updateText(existing_item.details, quantity);
 
     if (!updateResult) {
-      throw new Error("Failed to match item details format.");
+      throw new Error(`Failed to match item details format. Existing item details: "${existing_item.details}"`);
     }
 
     existing_item.details = updateResult.updatedText;
@@ -71,7 +71,9 @@ async function updateItem(favorite_items, shared_list, anylist_identifier, quant
       status: "success",
       itemName: existing_item.name,
       newQuantity: updateResult.newQuantity,
-      oldQuantity: updateResult.currentQuantity
+      oldQuantity: updateResult.currentQuantity,
+      newDetails: updateResult.updatedText,
+      oldDetails: existing_item.details
     }));
   } catch (error) {
     console.log(JSON.stringify({
