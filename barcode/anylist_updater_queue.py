@@ -3,6 +3,7 @@ import subprocess
 import threading
 import queue
 import json
+import re
 
 import os
 from dotenv import load_dotenv
@@ -33,6 +34,15 @@ class AnylistUpdaterQueue:
             with self.lock:
                 self._call_js_script(item_id, quantity)
                 self.task_queue.task_done()
+    
+    def _decode_json(self, stdout):
+        response = json.loads(stdout)
+        if response['status'] == 'success':
+            self.logger.info(f"[JS OUTPUT] Item: {response['itemName']} | Old Qty: {response['oldQuantity']} | New Qty: {response['newQuantity']} | Old Details: {response['oldDetails']} | New Details: {response['newDetails']}")
+            self.display.draw_image(body=f"{response['itemName']}\n{response['oldQuantity']} -> {response['newQuantity']}")
+        else:
+            self.logger.error(f"[JS ERROR] {response['message']}")
+            self.display.draw_image(body=response['message'])
 
     def _call_js_script(self, item_id, quantity):
         # Run Node.js script
@@ -52,22 +62,23 @@ class AnylistUpdaterQueue:
             self.logger.error(f"[JS ERROR] {stderr.strip()}")
             self.display.draw_image(body=f"JS Error: {stderr.strip()}")
             return
-
-        try:
-            response = json.loads(stdout)
-            if response['status'] == 'success':
-                # print(f"[JS OUTPUT] Item: {response['itemName']} | Old Qty: {response['oldQuantity']} | New Qty: {response['newQuantity']} | Old Details: {response['oldDetails']} | New Details: {response['newDetails']}")
-                self.logger.info(f"[JS OUTPUT] Item: {response['itemName']} | Old Qty: {response['oldQuantity']} | New Qty: {response['newQuantity']} | Old Details: {response['oldDetails']} | New Details: {response['newDetails']}")
-                self.display.draw_image(body=f"{response['itemName']}\n{response['oldQuantity']} -> {response['newQuantity']}")
-            else:
-                # print(f"[JS ERROR] {response['message']}")
-                self.logger.error(f"[JS ERROR] {response['message']}")
-                self.display.draw_image(body="Error:" + response['message'])
-        except json.JSONDecodeError:
-            # print(f"Failed to parse JS output: {stdout}")
-            self.logger.error(f"Failed to parse JS output: {stdout}")
-            self.display.draw_image(body="Error:" + f"Failed to parse JS output.\n{stdout}")
         
+        match = re.search(r'\{.*\}', stdout)
+        if match:
+            parsed = match.group(0)
+            self.logger.info(f"[THREAD STDOUT] parsed: {parsed}")
+            try:
+                response = json.loads(parsed)
+                if response['status'] == 'success':
+                    self.logger.info(f"[JS OUTPUT] Item: {response['itemName']} | Old Qty: {response['oldQuantity']} | New Qty: {response['newQuantity']} | Old Details: {response['oldDetails']} | New Details: {response['newDetails']}")
+                    self.display.draw_image(body=f"{response['itemName']}\n{response['oldQuantity']} -> {response['newQuantity']}")
+                else:
+                    self.logger.error(f"[JS ERROR] {response['message']}")
+                    self.display.draw_image(body=response['message'])
+            except json.JSONDecodeError:
+                self.display.draw_image(body="Error:" + f"Failed to parse JS output.\n{stdout}")
+                self.logger.error(f"[THREAD ERROR] stdout: {stdout}")
+
 # queue = AnylistUpdaterQueue()
 # queue.add_to_queue("c9bd57c0bee24caeb5bfbde5241831ce", 1)
 # time.sleep(3)

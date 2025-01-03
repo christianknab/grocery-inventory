@@ -31,7 +31,7 @@ function updateText(text, quantity) {
   const currentQuantity = parseInt(match[2], 10);
   const noun = match[3] || ''; // noun optional
 
-  const newQuantity = currentQuantity + quantity;
+  let newQuantity = currentQuantity + quantity;
 
   // Maintain original spacing/newlines
   var updatedText = "";
@@ -43,6 +43,7 @@ function updateText(text, quantity) {
     );
     updatedText = text.replace(fullMatch, updatedString);
   } else {
+    newQuantity = 0;
     updatedText = text;
   }
 
@@ -55,7 +56,7 @@ async function updateItem(favorite_items, shared_list, anylist_identifier, quant
     let updateResult = updateText(existing_item.details, quantity);
 
     if (!updateResult) {
-      throw new Error(`Failed to match item details format. Existing item details: "${existing_item.details}"`);
+      throw new Error(`${existing_item.name}\nInvalid quantity format!\nExisting item details:\n"${existing_item.details}"`);
     }
 
     existing_item.details = updateResult.updatedText;
@@ -92,6 +93,7 @@ function updater(barcode, quantity) {
 
   any.login(false).then(async () => {
     await any.getLists();
+    console.log("BLAH");
 
     const shared_list = any.getListByName(listName);
     const favorite_items = any.getFavoriteItemsByListId(shared_list.identifier);

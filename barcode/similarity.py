@@ -28,6 +28,6 @@ def extract_similar_item(product_name: str, choices: list[str]) -> tuple[str, in
             max_item = item
 
     # Get the index of the item with the maximum score in the original list
-    max_index = choices.index(max_item) if max_item in choices else -1
+    max_index = choices.index(max_item) if (max_value > 50 and max_item in choices) else -1
 
     return max_item, max_index

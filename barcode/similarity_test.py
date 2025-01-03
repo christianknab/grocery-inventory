@@ -11,7 +11,7 @@ with open("../anylist/all_favorites.txt", "r") as file:
     choices = file.readlines()
 
 #choices = [choice.lower() for choice in choices]
-product = " Mahatma Authentic Aromatic Jasmine White Rice 20 Lb "
+product = '''French's Classic Yellow Mustard Family Size 20 oz (Pack of 3)French's® Classic Yellow MustardFrench's Classic Yellow Mustard, 20 OzFrench's Classic Yellow Mustard - 20 oz - 1 ct.French's Classic Yellow Mustard - 20ozFrench's Classic Yellow Mustard, Stone Ground Mustard, Gluten Free, All Natural, 20 ozFrench's Mustard Yellow Squeeze, 20-Ounce Jars (Pack of 6)French's Classic Yellow Mustard-20 ozFrench's Classic Yellow Mustard 20OZ (Pack of 24)French's Classic Yellow Mustard - 20.0 ozFrench's Classic Yellow Mustard 20oz 6 PiecesFrench s Classic Yellow Mustard 20 ozPendaflex Reinforced Std Green Hanging Folders - Legal - 8 1/2" x 14" Sheet Size - Internal Pocket(s) - 1/3 Tab Cut - Standard Green - 25 / BoxFrench's Classic Yellow Mustard Family Size 20 oz (Pack of 12)Loft Loft Petite Dotted Mixed Media Shirttail SweaterFRENCHS 100% NATURAL CLASSIC YELLOW MUSTARD 1 x 567g BOTTLE AMERICAN IMPORTFrench's Mustard Yellow Squeeze, 20 oz, 6 pkFrench's Classic Yellow Mustard Family Size 20 oz (Pack of 2)French's Classic Yellow Mustard - 20 OzFrench's Mustard, Classic Yellow, 20 oz (1 lb 4 oz) 567 gFrench's Squeeze Mustard 20oz (567g)French's Classic Yellow Mustard, No Artificial Colors, 20 oz'''
 
 for scorer in scorers:
     print('scoring with', scorer)
@@ -34,7 +34,7 @@ for item, num in pp.items():
         max_item = item
 
 # item with the largest value
-if max_item is not None:
+if max_item is not None and max_value > 50:
     print("Item:", max_item, "Rank:", max_value)
 
 # lily's code lol - came up with genius algorithm

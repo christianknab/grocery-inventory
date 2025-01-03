@@ -64,3 +64,7 @@ Disable service
 ```
 sudo systemctl disable inventory-runner.service
 ```
+Restart Service
+```
+sudo systemctl restart inventory-runner.service
+```

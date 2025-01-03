@@ -103,38 +103,40 @@ def main():
                     logger.info(f"Product found in database: {existing_product}")
                 else:
                     # Barcode not in database, fetch from API
-                    product_info = api_client.get_product_info(barcode)
-                    
-                    if product_info:
-                        # Extract relevant product details
-                        product_name = product_info.get('properties', {}).get('title', ['Unknown Product'])[0]
+                    product_name = api_client.get_product_name(barcode)
+                    if product_name:
                         product_data = {
                             'barcode': barcode,
                             'product_name': product_name,
                         }
-                        # Check if the item is in the list
-                        # probably log the name somewhere for ease of debugging
-                        name, item_id = database.get_similar_item(product_name)
                         
+                        # Check if the item is in the list
+                        name, item_id = database.get_similar_item(product_name)
+
                         if item_id:
                             product_data['item_id'] = item_id
+                        
                         # Insert new product into database
                         inserted_product = database.insert_barcode_entry(product_data)
                         logger.info(f"Inserted new product: {product_data}")
                     else:
-                        # print("Could not retrieve product information.")
-                        logger.error("Could not retrieve product information.")
+                        logger.error(f"Could not retrieve product information. {barcode}")
+                        display.draw_image(scanner.operation, body=f"Product Data\nNot Found:\n-> {barcode}")
+                        continue
                 # get anylist identifier and call js function
                 if item_id:
                     item = database.get_inventory_item(id=item_id)
                     # Skip if we are to ignore the item
                     if item['ignore']:
-                        # print("Ignoring item")
                         logger.info(f"Ignoring item: {item['name']}")
                         display.draw_image(scanner.operation, body=f"{item['name']}\n-> Update Manually!")
                         continue
                     display.draw_image(scanner.operation, item['name'] + '\nUpdating Quantity...')
                     anylist_updater_queue.add_to_queue(item['anylist_identifier'], 1 if scanner.operation == Operation.INSERT else -1)
+                # No item id found
+                else:
+                    logger.error(f"No item id found. Existing product: {existing_product}")
+                    display.draw_image(scanner.operation, body=f"No anylist id linked\nUpdate db manually\n-> {barcode}\n{existing_product['product_name']}")
             except Exception as e:
                 # print(f"Error during barcode processing: {e}")
                 logger.error(f"Error during barcode processing: {e}", exc_info=True)
