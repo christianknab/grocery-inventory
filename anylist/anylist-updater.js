@@ -36,7 +36,7 @@ function updateText(text, quantity) {
   // Maintain original spacing/newlines
   var updatedText = "";
 
-  if (newQuantity > 0) {
+  if (newQuantity >= 0) {
     const updatedString = fullMatch.replace(
       /(\d+)(\s+[a-zA-Z]+)?\s*(\d{1,2}\/\d{1,2})/,
       `${newQuantity}${noun} ${currentDate}`

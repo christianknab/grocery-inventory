@@ -63,7 +63,7 @@ def main():
     scanner = BarcodeScanner(led_controller=led)
     api_client = BarcodeAPI(api_key=RAPIDAPI_KEY, api_host=RAPIDAPI_HOST)
     database = InventoryDatabase(url=SUPABASE_URL, key=SUPABASE_KEY)
-    anylist_updater_queue = AnylistUpdaterQueue(display, logger)
+    anylist_updater_queue = AnylistUpdaterQueue(display, logger, led)
 
     # Register signal handlers
     signal.signal(signal.SIGINT, cleanup_and_exit)

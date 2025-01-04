@@ -20,6 +20,13 @@ class LEDController:
         else:
             GPIO.output(self.insert_pin, GPIO.LOW)
             GPIO.output(self.remove_pin, GPIO.LOW)
+    
+    def blink(self, pin, times, delay):
+        for i in range(times):
+            self.off(pin)
+            time.sleep(delay)
+            self.on(pin)
+            time.sleep(delay)
 
     def update_leds(self, operation):
         self.off()
