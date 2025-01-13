@@ -50,7 +50,7 @@ function updateText(text, quantity) {
   return { updatedText, newQuantity, currentQuantity };
 }
 
-async function updateItem(favorite_items, shared_list, anylist_identifier, quantity) {
+async function updateItem(favorite_items, shared_list, anylist_identifier, quantity, any) {
   try {
     let existing_item = favorite_items.getItemById(anylist_identifier);
     let updateResult = updateText(existing_item.details, quantity);
@@ -58,14 +58,37 @@ async function updateItem(favorite_items, shared_list, anylist_identifier, quant
     if (!updateResult) {
       throw new Error(`${existing_item.name}\nInvalid quantity format!\nExisting item details:\n"${existing_item.details}"`);
     }
-
+    old_details = existing_item.details;
     existing_item.details = updateResult.updatedText;
     await existing_item.save(true);
 
+    // update if item in list
+    let addedToList = false;
     let duplicate_item = shared_list.getItemByName(existing_item.name);
     if (duplicate_item) {
       duplicate_item.details = updateResult.updatedText;
       await duplicate_item.save();
+    }
+    // add to list if the inventory is 0
+    else if (!duplicate_item && updateResult.newQuantity == 0) {
+      // copy the item
+      let new_item_data = {
+        identifier: existing_item.identifier,
+        name: existing_item.name,
+        details: updateResult.updatedText,
+        quantity: existing_item.quantity,
+        checked: existing_item.checked,
+        manualSortIndex: existing_item.manualSortIndex,
+        userId: existing_item.userId,
+        categoryMatchId: existing_item.categoryMatchId,
+        storeIds: existing_item.storeIds,
+      };
+      new_item = any.createItem(new_item_data);
+      // let new_item = existing_item.copyWith();
+      // new_item = any.createItem(existing_item);
+      new_item = await shared_list.addItem(new_item);
+      await new_item.save();
+      addedToList = true;
     }
 
     console.log(JSON.stringify({
@@ -74,7 +97,8 @@ async function updateItem(favorite_items, shared_list, anylist_identifier, quant
       newQuantity: updateResult.newQuantity,
       oldQuantity: updateResult.currentQuantity,
       newDetails: updateResult.updatedText,
-      oldDetails: existing_item.details
+      oldDetails: old_details,
+      addedToList: addedToList,
     }));
   } catch (error) {
     console.log(JSON.stringify({
@@ -90,14 +114,13 @@ function updater(barcode, quantity) {
     email: process.env.ANYLIST_EMAIL,
     password: process.env.ANYLIST_PWD,
   });
-
   any.login(false).then(async () => {
     await any.getLists();
     console.log("BLAH");
 
     const shared_list = any.getListByName(listName);
     const favorite_items = any.getFavoriteItemsByListId(shared_list.identifier);
-    await updateItem(favorite_items, shared_list, anylist_identifier, quantity);
+    await updateItem(favorite_items, shared_list, anylist_identifier, quantity, any);
 
     any.teardown();
     process.exit(0);

@@ -71,8 +71,8 @@ class AnylistUpdaterQueue:
             try:
                 response = json.loads(parsed)
                 if response['status'] == 'success':
-                    self.logger.info(f"[JS OUTPUT] Item: {response['itemName']} | Old Qty: {response['oldQuantity']} | New Qty: {response['newQuantity']} | Old Details: {response['oldDetails']} | New Details: {response['newDetails']}")
-                    self.display.draw_image(body=f"{response['itemName']}\n{response['oldQuantity']} -> {response['newQuantity']}")
+                    self.logger.info(f"[JS OUTPUT] Item: {response['itemName']} | Old Qty: {response['oldQuantity']} | New Qty: {response['newQuantity']} | Old Details: {response['oldDetails']} | New Details: {response['newDetails']} | Added to List: {response['addedToList']}")
+                    self.display.draw_image(body=f"{response['itemName']}\n{response['oldQuantity']} -> {response['newQuantity']}\n{'Added to list' if response['addedToList'] else ''}")
                     self.led_controller.blink(led, 2, 0.5)
                 else:
                     self.logger.error(f"[JS ERROR] {response['message']}")

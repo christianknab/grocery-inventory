@@ -52,7 +52,7 @@ any.login(connectWebSocket = false).then(async () => {
   // console.log(favorite_items)
 
   favorite_items.items.forEach(item => {
-    console.log(item._name)
+    console.log(item)
     // console.log(item._protobuf)
   });
 

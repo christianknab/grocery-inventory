@@ -135,8 +135,13 @@ def main():
                     anylist_updater_queue.add_to_queue(item['anylist_identifier'], 1 if scanner.operation == Operation.INSERT else -1)
                 # No item id found
                 else:
-                    logger.error(f"No item id found. Existing product: {existing_product}")
-                    display.draw_image(scanner.operation, body=f"No anylist id linked\nUpdate db manually\n-> {barcode}\n{existing_product['product_name']}")
+                    existing = 'NONE'
+                    if product_name:
+                        existing = product_name
+                    elif existing_product:
+                        existing = existing_product
+                    logger.error(f"No item id found. Existing product: {existing}")
+                    display.draw_image(scanner.operation, body=f"No anylist id linked\nUpdate db manually\n-> {barcode}\n{existing}")
             except Exception as e:
                 # print(f"Error during barcode processing: {e}")
                 logger.error(f"Error during barcode processing: {e}", exc_info=True)
