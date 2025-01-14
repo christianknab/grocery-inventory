@@ -71,17 +71,26 @@ async function updateItem(favorite_items, shared_list, anylist_identifier, quant
     }
     // add to list if the inventory is 0
     else if (!duplicate_item && updateResult.newQuantity == 0) {
+      // check first if the item's category is 'other'
+      // if it is, there might be another category (the correct category) in the 'recent items' list
+      let categoryMatchId = existing_item.categoryMatchId;
+      const recent_items = any.getRecentItemsByListId(shared_list.identifier);
+      recent_items.forEach(item => {
+        if (item.name == existing_item.name) { if (item.categoryMatchId != 'other') { categoryMatchId = item.categoryMatchId; } }
+      });
       // copy the item
       let new_item_data = {
         identifier: existing_item.identifier,
         name: existing_item.name,
         details: updateResult.updatedText,
-        quantity: existing_item.quantity,
+        quantityPb: existing_item.quantityPb,
         checked: existing_item.checked,
         manualSortIndex: existing_item.manualSortIndex,
         userId: existing_item.userId,
-        categoryMatchId: existing_item.categoryMatchId,
+        categoryMatchId: categoryMatchId,
         storeIds: existing_item.storeIds,
+        photoIds: existing_item.photoIds,
+        packageSizePb: existing_item.packageSizePb,
       };
       new_item = any.createItem(new_item_data);
       // let new_item = existing_item.copyWith();
@@ -116,7 +125,6 @@ function updater(barcode, quantity) {
   });
   any.login(false).then(async () => {
     await any.getLists();
-    console.log("BLAH");
 
     const shared_list = any.getListByName(listName);
     const favorite_items = any.getFavoriteItemsByListId(shared_list.identifier);
