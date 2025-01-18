@@ -95,6 +95,7 @@ def main():
                 # Check if barcode exists in database
                 existing_product = database.get_barcode_entry(barcode)
                 item_id = None
+                product_name = None
 
                 if existing_product:
                     # Barcode exists, update description or handle as needed
