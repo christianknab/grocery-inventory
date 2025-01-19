@@ -1,13 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import AnyList from "../../anylist/lib/index.js";
 
-const SUPABASE_URL = "https://sofpeelneqedykrlaadz.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNvZnBlZWxuZXFlZHlrcmxhYWR6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNDE2MDUwOCwiZXhwIjoyMDQ5NzM2NTA4fQ.w06tYWQKx7fLfX_gXQJZ94bYZdItsZOzU4CnGR_4d-Q";
-
-const ANYLIST_EMAIL = "christiantknab@gmail.com";
-const ANYLIST_PWD = "Q6ckyRK&aCFNvU0l";
-
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const processAnyList = async () => {
