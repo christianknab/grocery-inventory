@@ -1,6 +1,6 @@
 const dotenv = require("dotenv");
 const AnyList = require("../../anylist/lib/index");
-const path = require('path')
+const path = require("path");
 
 // Parse arguments
 const anylist_identifier = process.argv[2];
@@ -27,9 +27,9 @@ function updateText(text, quantity) {
   }
 
   // Get the current quantity and increment it
-  const fullMatch = match[1];  // full match with any space/newline padding
+  const fullMatch = match[1]; // full match with any space/newline padding
   const currentQuantity = parseInt(match[2], 10);
-  const noun = match[3] || ''; // noun optional
+  const noun = match[3] || ""; // noun optional
 
   let newQuantity = currentQuantity + quantity;
 
@@ -39,7 +39,7 @@ function updateText(text, quantity) {
   if (newQuantity >= 0) {
     const updatedString = fullMatch.replace(
       /(\d+)(\s+[a-zA-Z]+)?\s*(\d{1,2}\/\d{1,2})/,
-      `${newQuantity}${noun} ${currentDate}`
+      `${newQuantity}${noun} ${currentDate}`,
     );
     updatedText = text.replace(fullMatch, updatedString);
   } else {
@@ -50,13 +50,21 @@ function updateText(text, quantity) {
   return { updatedText, newQuantity, currentQuantity };
 }
 
-async function updateItem(favorite_items, shared_list, anylist_identifier, quantity, any) {
+async function updateItem(
+  favorite_items,
+  shared_list,
+  anylist_identifier,
+  quantity,
+  any,
+) {
   try {
     let existing_item = favorite_items.getItemById(anylist_identifier);
     let updateResult = updateText(existing_item.details, quantity);
 
     if (!updateResult) {
-      throw new Error(`${existing_item.name}\nInvalid quantity format!\nExisting item details:\n"${existing_item.details}"`);
+      throw new Error(
+        `${existing_item.name}\nInvalid quantity format!\nExisting item details:\n"${existing_item.details}"`,
+      );
     }
     old_details = existing_item.details;
     existing_item.details = updateResult.updatedText;
@@ -68,15 +76,18 @@ async function updateItem(favorite_items, shared_list, anylist_identifier, quant
     if (duplicate_item) {
       duplicate_item.details = updateResult.updatedText;
       await duplicate_item.save();
-    }
-    // add to list if the inventory is 0
+    } // add to list if the inventory is 0
     else if (!duplicate_item && updateResult.newQuantity == 0) {
       // check first if the item's category is 'other'
       // if it is, there might be another category (the correct category) in the 'recent items' list
       let categoryMatchId = existing_item.categoryMatchId;
       const recent_items = any.getRecentItemsByListId(shared_list.identifier);
-      recent_items.forEach(item => {
-        if (item.name == existing_item.name) { if (item.categoryMatchId != 'other') { categoryMatchId = item.categoryMatchId; } }
+      recent_items.forEach((item) => {
+        if (item.name == existing_item.name) {
+          if (item.categoryMatchId != "other") {
+            categoryMatchId = item.categoryMatchId;
+          }
+        }
       });
       // copy the item
       let new_item_data = {
@@ -112,13 +123,13 @@ async function updateItem(favorite_items, shared_list, anylist_identifier, quant
   } catch (error) {
     console.log(JSON.stringify({
       status: "error",
-      message: error.message
+      message: error.message,
     }));
   }
 }
 
 function updater(barcode, quantity) {
-  dotenv.config({ path: path.resolve(__dirname, '../anylist/.env') });
+  dotenv.config({ path: path.resolve(__dirname, "../anylist/.env") });
   const any = new AnyList({
     email: process.env.ANYLIST_EMAIL,
     password: process.env.ANYLIST_PWD,
@@ -128,14 +139,20 @@ function updater(barcode, quantity) {
 
     const shared_list = any.getListByName(listName);
     const favorite_items = any.getFavoriteItemsByListId(shared_list.identifier);
-    await updateItem(favorite_items, shared_list, anylist_identifier, quantity, any);
+    await updateItem(
+      favorite_items,
+      shared_list,
+      anylist_identifier,
+      quantity,
+      any,
+    );
 
     any.teardown();
     process.exit(0);
   }).catch((err) => {
     console.log(JSON.stringify({
       status: "error",
-      message: "Failed to login or retrieve lists."
+      message: "Failed to login or retrieve lists.",
     }));
     process.exit(1);
   });

@@ -1,5 +1,6 @@
 const dotenv = require("dotenv");
 const AnyList = require("../../anylist/lib/index");
+// const AnyList = require('anylist');
 const fs = require('fs');
 
 const listName = "Shared grocery list";
@@ -11,7 +12,7 @@ const any = new AnyList({
   password: process.env.ANYLIST_PWD,
 });
 
-any.login(connectWebSocket = false).then(async () => {
+any.login(false).then(async () => {
   await any.getLists();
   const list = any.getListByName("Shared grocery list");
 
@@ -26,14 +27,14 @@ any.login(connectWebSocket = false).then(async () => {
 
 
 
-  const favorite_items = any.getFavoriteItemsByListId(list.identifier);
-  //   console.log("FAVORITES")
-  // console.log(favorite_items)
+  // const favorite_items = any.getFavoriteItemsByListId(list.identifier);
+  // //   console.log("FAVORITES")
+  // // console.log(favorite_items)
 
-    favorite_items.items.forEach(item => {
-      console.log(item)
-      // console.log(item._protobuf)
-    });
+  //   favorite_items.items.forEach(item => {
+  //     console.log(item)
+  //     // console.log(item._protobuf)
+  //   });
 
 
 
