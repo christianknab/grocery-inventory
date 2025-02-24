@@ -1,12 +1,14 @@
 import { createClient } from "@supabase/supabase-js";
 import AnyList from "../../anylist/lib/index.js";
+import dotenv from 'dotenv';
+dotenv.config();
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 const processAnyList = async () => {
   const any = new AnyList({
-    email: ANYLIST_EMAIL,
-    password: ANYLIST_PWD,
+    email: process.env.ANYLIST_EMAIL,
+    password: process.env.ANYLIST_PWD,
   });
 
   try {

@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@supabase/supabase-js": "^2.47.16",
+    "@supabase/supabase-js": "^2.48.0",
     "anylist": "^0.8.4",
     "dotenv": "^16.4.5",
     "form-data": "^4.0.0"

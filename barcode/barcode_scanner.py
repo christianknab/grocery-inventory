@@ -82,4 +82,4 @@ class BarcodeScanner:
 
     def validate_barcode(self, barcode: str) -> bool:
         print(barcode.isdigit(), len(barcode) == 12, len(barcode) == 12)
-        return barcode.isdigit() and ( len(barcode) == 12 or len(barcode) == 8)
+        return barcode.isdigit()
