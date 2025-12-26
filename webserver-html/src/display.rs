@@ -2,6 +2,18 @@ use defmt::info;
 use heapless::String;
 use picoserve::response::IntoResponse;
 use crate::GlobalAppState;
+use embassy_time::{Duration, Timer};
+
+pub const DISPLAY_IDLE_TIMEOUT: Duration = Duration::from_secs(20);
+
+#[embassy_executor::task]
+pub async fn display_idle_clear_task(state: &'static GlobalAppState) -> ! {
+    loop {
+        Timer::after(Duration::from_secs(5)).await; // poll interval
+        let mut display = state.display.lock().await;
+        let _ = display.clear_if_idle(DISPLAY_IDLE_TIMEOUT);
+    }
+}
 
 #[derive(serde::Deserialize)]
 pub struct DisplayRequest {
