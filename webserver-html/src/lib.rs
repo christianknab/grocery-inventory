@@ -3,6 +3,7 @@
 
 pub mod display;
 pub mod display_controller;
+pub mod led_controller;
 pub mod web;
 pub mod wifi;
 
@@ -11,12 +12,17 @@ use embassy_sync::mutex::Mutex;
 
 pub struct AppState<I2C> {
     pub display: Mutex<CriticalSectionRawMutex, display_controller::DisplayController<I2C>>,
+    pub leds: Mutex<CriticalSectionRawMutex, led_controller::LedController<'static>>,
 }
 
 impl<I2C> AppState<I2C> {
-    pub fn new(display: display_controller::DisplayController<I2C>) -> Self {
+    pub fn new(
+        display: display_controller::DisplayController<I2C>,
+        leds: led_controller::LedController<'static>,
+    ) -> Self {
         Self {
             display: Mutex::new(display),
+            leds: Mutex::new(leds),
         }
     }
 }

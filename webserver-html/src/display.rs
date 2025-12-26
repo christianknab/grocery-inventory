@@ -11,7 +11,11 @@ pub async fn display_idle_clear_task(state: &'static GlobalAppState) -> ! {
     loop {
         Timer::after(Duration::from_secs(5)).await; // poll interval
         let mut display = state.display.lock().await;
-        let _ = display.clear_if_idle(DISPLAY_IDLE_TIMEOUT);
+        if let Ok(true) = display.clear_if_idle(DISPLAY_IDLE_TIMEOUT) {
+            drop(display);
+            let mut leds = state.leds.lock().await;
+            leds.off();
+        }
     }
 }
 
@@ -32,6 +36,11 @@ pub async fn display_handler(
 ) -> impl IntoResponse {
     info!("Header: {}", input.0.header);
     info!("Body: {}", input.0.body);
+
+    {
+        let mut leds = state.leds.lock().await;
+        leds.update_from_header(&input.0.header);
+    }
 
     let mut display = state.display.lock().await;
     display.clear();

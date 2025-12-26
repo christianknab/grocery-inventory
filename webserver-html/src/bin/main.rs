@@ -34,6 +34,8 @@ esp_bootloader_esp_idf::esp_app_desc!();
 use webserver_html as lib;
 use lib::display_controller::DisplayController;
 use lib::display::display_idle_clear_task;
+use lib::led_controller::LedController;
+use esp_hal::gpio::Pin;
 
 #[esp_rtos::main]
 async fn main(spawner: Spawner) -> ! {
@@ -69,9 +71,12 @@ async fn main(spawner: Spawner) -> ! {
     let display_controller = DisplayController::new(i2c0)
         .expect("Failed to initialize display");
 
+    // Initialize LED controller (GPIO7 = ADDING, GPIO6 = REMOVING)
+    let led_controller = LedController::new(peripherals.GPIO5.degrade(), peripherals.GPIO4.degrade());
+
     let app_state = lib::mk_static!(
         lib::GlobalAppState,
-        lib::AppState::new(display_controller)
+        lib::AppState::new(display_controller, led_controller)
     );
 
     spawner.must_spawn(display_idle_clear_task(app_state));
