@@ -32,6 +32,7 @@ esp_bootloader_esp_idf::esp_app_desc!();
 )]
 
 use webserver_html as lib;
+use lib::display_controller::DisplayController;
 
 #[esp_rtos::main]
 async fn main(spawner: Spawner) -> ! {
@@ -49,6 +50,29 @@ async fn main(spawner: Spawner) -> ! {
 
     info!("Embassy initialized!");
 
+    // Initialize I2C for display
+    let i2c0 = esp_hal::i2c::master::I2c::new(
+        peripherals.I2C0,
+        esp_hal::i2c::master::Config::default().with_frequency(esp_hal::time::Rate::from_khz(400))
+        // esp_hal::i2c::master::Config {
+        //     frequency: 400.kHz(),
+        //     timeout: Some(1000),
+        // },
+    )
+    .expect("Failed to init I2C0") // <-- unwrap Result<I2c<...>, ConfigError>
+    .with_sda(peripherals.GPIO10)
+    .with_scl(peripherals.GPIO8)
+    .into_async();
+
+    // Initialize display controller
+    let display_controller = DisplayController::new(i2c0)
+        .expect("Failed to initialize display");
+
+    let app_state = lib::mk_static!(
+        lib::GlobalAppState,
+        lib::AppState::new(display_controller)
+    );
+
     let radio_init = &*lib::mk_static!(
         esp_radio::Controller<'static>,
         esp_radio::init().expect("Failed to initialize Wi-Fi/BLE controller")
@@ -57,7 +81,7 @@ async fn main(spawner: Spawner) -> ! {
 
     let stack = lib::wifi::start_wifi(radio_init, peripherals.WIFI, rng, &spawner).await;
 
-    let web_app = lib::web::WebApp::default();
+    let web_app = lib::web::WebApp::new(app_state);
     for id in 0..lib::web::WEB_TASK_POOL_SIZE {
         spawner.must_spawn(lib::web::web_task(
             id,

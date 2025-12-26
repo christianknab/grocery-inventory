@@ -60,7 +60,14 @@ smoltcp = { version = "0.12.0", default-features = false, features = [
 
 critical-section = "1.2.0"
 static_cell      = "2.1.1"
-picoserve = { version = "0.17.1", features = ["embassy"] }
+picoserve = { version = "0.17.1", features = ["embassy", "json"] }
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+heapless = { version = "0.8", features = ["serde"] }
+embedded-graphics = "0.8.1"
+embedded-hal = "1.0.0"
+ssd1306 = "0.10.0"
+display-interface = "0.5.0"
+embassy-sync = "0.7.2"
 
 
 [profile.dev]
