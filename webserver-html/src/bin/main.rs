@@ -33,6 +33,7 @@ esp_bootloader_esp_idf::esp_app_desc!();
 
 use webserver_html as lib;
 use lib::display_controller::DisplayController;
+use lib::display::display_idle_clear_task;
 
 #[esp_rtos::main]
 async fn main(spawner: Spawner) -> ! {
@@ -72,6 +73,8 @@ async fn main(spawner: Spawner) -> ! {
         lib::GlobalAppState,
         lib::AppState::new(display_controller)
     );
+
+    spawner.must_spawn(display_idle_clear_task(app_state));
 
     let radio_init = &*lib::mk_static!(
         esp_radio::Controller<'static>,

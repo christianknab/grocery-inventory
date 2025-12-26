@@ -4,7 +4,7 @@ use picoserve::response::IntoResponse;
 use crate::GlobalAppState;
 use embassy_time::{Duration, Timer};
 
-pub const DISPLAY_IDLE_TIMEOUT: Duration = Duration::from_secs(20);
+pub const DISPLAY_IDLE_TIMEOUT: Duration = Duration::from_secs(2*60);
 
 #[embassy_executor::task]
 pub async fn display_idle_clear_task(state: &'static GlobalAppState) -> ! {
