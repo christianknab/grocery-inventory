@@ -80,12 +80,12 @@ def main():
             barcode = scanner.scan_barcode()
             # print(barcode)
             logger.debug(f"Scanned barcode: {barcode}")
-            display.draw_image(body=f"Searching for barcode: {barcode}")
 
             # Check if setup barcode
             if barcode in ['000000000000', '111111111111']:
                 display.draw_image(scanner.operation, body="Please Scan Item")
                 continue
+
             # Validate barcode
             if not scanner.validate_barcode(barcode):
                 display.draw_image(scanner.operation, body=f"Invalid: {barcode}\nPlease try again.")
@@ -93,11 +93,11 @@ def main():
                 logger.warning(f"Invalid barcode: {barcode}")
                 continue
 
+            display.draw_image(body=f"Searching for barcode: {barcode}")
             try:
                 # Check if barcode exists in database
                 start = time.time()
                 existing_product = database.get_barcode_entry(barcode)
-                print(time.time() - start)
                 item_id = None
                 product_name = None
 
