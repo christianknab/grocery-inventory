@@ -22,6 +22,8 @@ fn panic(_: &core::panic::PanicInfo) -> ! {
 
 extern crate alloc;
 
+use alloc::format;
+
 // This creates a default app-descriptor required by the esp-idf bootloader.
 // For more information see: <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/app_image_format.html#application-description>
 esp_bootloader_esp_idf::esp_app_desc!();
@@ -68,7 +70,7 @@ async fn main(spawner: Spawner) -> ! {
     .into_async();
 
     // Initialize display controller
-    let display_controller = DisplayController::new(i2c0)
+    let mut display_controller = DisplayController::new(i2c0)
         .expect("Failed to initialize display");
 
     // Initialize LED controller (GPIO7 = ADDING, GPIO6 = REMOVING)
@@ -79,15 +81,26 @@ async fn main(spawner: Spawner) -> ! {
         lib::AppState::new(display_controller, led_controller)
     );
 
-    spawner.must_spawn(display_idle_clear_task(app_state));
+    let mut display = app_state.display.lock().await;
 
+    display.draw_image("SETTING UP", "Initializing WIFI...").expect("display err");
+    
     let radio_init = &*lib::mk_static!(
         esp_radio::Controller<'static>,
         esp_radio::init().expect("Failed to initialize Wi-Fi/BLE controller")
     );
     let rng = Rng::new();
 
-    let stack = lib::wifi::start_wifi(radio_init, peripherals.WIFI, rng, &spawner).await;
+    let (stack, ip) = lib::wifi::start_wifi(radio_init, peripherals.WIFI, rng, &spawner).await;
+
+    let line2 = format!("IP: {}", ip);
+    display
+        .draw_image("SUCCESS!", &line2)
+        .expect("display err");
+
+    drop(display);
+
+    spawner.must_spawn(display_idle_clear_task(app_state));
 
     let web_app = lib::web::WebApp::new(app_state);
     for id in 0..lib::web::WEB_TASK_POOL_SIZE {

@@ -1,3 +1,8 @@
+extern crate alloc;
+
+use alloc::format;
+use alloc::string::String;
+
 use embassy_executor::Spawner;
 use embassy_net::{DhcpConfig, Runner, Stack, StackResources};
 use embassy_time::{Duration, Timer};
@@ -69,7 +74,7 @@ pub async fn start_wifi(
     wifi: esp_hal::peripherals::WIFI<'static>,
     rng: Rng,
     spawner: &Spawner,
-) -> Stack<'static> {
+) -> (Stack<'static>, String) {
     let (wifi_controller, interfaces) = esp_radio::wifi::new(radio_init, wifi, Default::default())
         .expect("Failed to initialize Wi-Fi controller");
 
@@ -90,12 +95,12 @@ pub async fn start_wifi(
     spawner.spawn(connection(wifi_controller)).ok();
     spawner.spawn(net_task(runner)).ok();
 
-    wait_for_connection(stack).await;
+    let ip = wait_for_connection(stack).await;
 
-    stack
+    (stack, ip)
 }
 
-async fn wait_for_connection(stack: Stack<'_>) {
+async fn wait_for_connection(stack: Stack<'_>) -> String {
     println!("Waiting for link to be up");
     loop {
         if stack.is_link_up() {
@@ -108,7 +113,7 @@ async fn wait_for_connection(stack: Stack<'_>) {
     loop {
         if let Some(config) = stack.config_v4() {
             println!("Got IP: {}", config.address);
-            break;
+            return format!("{}", config.address);
         }
         Timer::after(Duration::from_millis(500)).await;
     }
