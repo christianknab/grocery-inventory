@@ -1,4 +1,3 @@
-import os
 from supabase import create_client, Client
 from typing import Dict, Optional
 from similarity import extract_similar_item

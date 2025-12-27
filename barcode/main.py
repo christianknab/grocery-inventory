@@ -3,6 +3,7 @@ import logging.handlers
 import os
 import signal
 import sys
+import time
 from barcode_api import BarcodeAPI
 from barcode_scanner import BarcodeScanner
 from database import InventoryDatabase
@@ -79,6 +80,7 @@ def main():
             barcode = scanner.scan_barcode()
             # print(barcode)
             logger.debug(f"Scanned barcode: {barcode}")
+            display.draw_image(body=f"Searching for barcode: {barcode}")
 
             # Check if setup barcode
             if barcode in ['000000000000', '111111111111']:
@@ -93,7 +95,9 @@ def main():
 
             try:
                 # Check if barcode exists in database
+                start = time.time()
                 existing_product = database.get_barcode_entry(barcode)
+                print(time.time() - start)
                 item_id = None
                 product_name = None
 
