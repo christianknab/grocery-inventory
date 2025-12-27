@@ -2,7 +2,7 @@ use embassy_net::Stack;
 use embassy_time::Duration;
 use esp_alloc as _;
 use picoserve::{AppBuilder, AppRouter, Router, response::File, routing};
-use crate::{display::display_handler, GlobalAppState};
+use crate::{display::ui_handler, GlobalAppState};
 
 pub struct Application {
     state: &'static GlobalAppState,
@@ -14,7 +14,7 @@ impl AppBuilder for Application {
     fn build_app(self) -> picoserve::Router<Self::PathRouter> {
         picoserve::Router::new()
             .route("/", routing::get_service(File::html(include_str!("index.html"))))
-            .route("/display", routing::post(display_handler))
+            .route("/ui", routing::post(ui_handler))
             .with_state(self.state)
     }
 }

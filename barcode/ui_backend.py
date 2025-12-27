@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import threading
 from dataclasses import dataclass
 
 from operation import Operation
@@ -14,31 +13,11 @@ def _normalize_header(header: Operation | str) -> str:
     return str(header).strip().upper()
 
 
-@dataclass
-class UiState:
-    header: Operation | str = Operation.INSERT
-    body: str = "Please Scan Item"
-
-
-class UiStateStore:
-    def __init__(self, initial: UiState | None = None):
-        self._state = initial or UiState()
-        self._lock = threading.Lock()
-
-    def get(self) -> UiState:
-        with self._lock:
-            return UiState(header=self._state.header, body=self._state.body)
-
-    def set(self, *, header: Operation | str | None = None, body: str | None = None) -> UiState:
-        with self._lock:
-            if header is not None:
-                self._state.header = header
-            if body is not None:
-                self._state.body = body
-            return UiState(header=self._state.header, body=self._state.body)
-
-
-DEFAULT_UI_STATE = UiStateStore()
+@dataclass(frozen=True)
+class UiPayload:
+    header: str | None = None
+    body: str | None = None
+    color: str | None = None
 
 
 class DisplayBackend:
@@ -66,19 +45,15 @@ class Esp32HttpDisplayBackend(DisplayBackend):
         client: Esp32UiClient | None = None,
         config: Esp32UiClientConfig | None = None,
         logger=None,
-        state: UiStateStore | None = None,
     ):
         self._client = client or Esp32UiClient(config=config, logger=logger)
-        self._state = state or DEFAULT_UI_STATE
 
     def clear(self) -> None:
-        current = self._state.get()
-        self.set_display(header=current.header, body="")
+        # Explicit blank header/body.
+        self._client.post_ui(header="", body="")
 
     def set_display(self, *, header: Operation | str, body: str) -> None:
-        # Keep shared state so LED updates don't wipe the body (and vice-versa).
-        updated = self._state.set(header=header, body=str(body))
-        self._client.set_display(_normalize_header(updated.header), updated.body)
+        self._client.post_ui(header=_normalize_header(header), body=str(body))
 
 
 class Esp32HttpLedBackend(LedBackend):
@@ -87,15 +62,15 @@ class Esp32HttpLedBackend(LedBackend):
         client: Esp32UiClient | None = None,
         config: Esp32UiClientConfig | None = None,
         logger=None,
-        state: UiStateStore | None = None,
     ):
         self._client = client or Esp32UiClient(config=config, logger=logger)
-        self._state = state or DEFAULT_UI_STATE
+
+    def _operation_to_color(self, operation: Operation) -> str:
+        return "GREEN" if operation == Operation.INSERT else "RED" if operation == Operation.REMOVE else ""
 
     def update_leds(self, operation: Operation) -> None:
-        # LEDs are controlled by the ESP32 based on header state.
-        updated = self._state.set(header=operation)
-        self._client.set_display(_normalize_header(updated.header), updated.body)
+        # LEDs are controlled by the ESP32 based on color.
+        self._client.post_ui(color=self._operation_to_color(operation))
 
 
 class LocalOledDisplayBackend(DisplayBackend):
@@ -219,16 +194,14 @@ def choose_backend(kind: str | None) -> str:
 
 
 def auto_select_display_backend() -> DisplayBackend:
-    try:
-        return Esp32HttpDisplayBackend()
-    except Exception:
-        return LocalOledDisplayBackend()
+    # Prefer local if it imports; else fallback to http.
+    return Esp32HttpDisplayBackend()
 
 
 def auto_select_led_backend(insert_pin: int | None, remove_pin: int | None) -> LedBackend:
-    try:
-        if insert_pin is None or remove_pin is None:
-            raise RuntimeError("pins missing")
-        return Esp32HttpLedBackend()
-    except Exception:
-        return LocalGpioLedBackend(insert_pin=insert_pin, remove_pin=remove_pin)
+    # try:
+    #     if insert_pin is None or remove_pin is None:
+    #         raise RuntimeError("pins missing")
+    #     return LocalGpioLedBackend(insert_pin=insert_pin, remove_pin=remove_pin)
+    # except Exception:
+    return Esp32HttpLedBackend()

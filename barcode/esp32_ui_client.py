@@ -10,7 +10,7 @@ from typing import Optional
 @dataclass(frozen=True)
 class Esp32UiClientConfig:
     base_url: str
-    display_path: str
+    ui_path: str
     timeout_s: float = 2.0
     retries: int = 1
     retry_backoff_s: float = 0.25
@@ -18,20 +18,23 @@ class Esp32UiClientConfig:
     @staticmethod
     def from_env(
         base_url_env: str = "ESP32_BASE_URL",
-        display_path_env: str = "ESP32_DISPLAY_PATH",
+        ui_path_env: str = "ESP32_UI_PATH",
         timeout_env: str = "ESP32_TIMEOUT_S",
         retries_env: str = "ESP32_RETRIES",
         backoff_env: str = "ESP32_RETRY_BACKOFF_S",
         default_base_url: str = "",
+        default_ui_path: str = "",
     ) -> "Esp32UiClientConfig":
         base_url = os.getenv(base_url_env, default_base_url).rstrip("/")
-        display_path = os.getenv(display_path_env, "")
+
+        ui_path = os.getenv(ui_path_env)
+
         timeout_s = float(os.getenv(timeout_env, "2.0"))
         retries = int(os.getenv(retries_env, "1"))
         retry_backoff_s = float(os.getenv(backoff_env, "0.25"))
         return Esp32UiClientConfig(
             base_url=base_url,
-            display_path=display_path,
+            ui_path=ui_path,
             timeout_s=timeout_s,
             retries=retries,
             retry_backoff_s=retry_backoff_s,
@@ -43,10 +46,28 @@ class Esp32UiClient:
         self.config = config or Esp32UiClientConfig.from_env()
         self.logger = logger
 
-    def set_display(self, header: str, body: str) -> None:
-        url = f"{self.config.base_url}{self.config.display_path}"
-        payload = {"header": header, "body": body}
+    def post_ui(
+        self,
+        *,
+        header: Optional[str] = None,
+        body: Optional[str] = None,
+        color: Optional[str] = None,
+    ) -> None:
+        url = f"{self.config.base_url}{self.config.ui_path}"
+        payload: dict = {}
+        if header is not None:
+            payload["header"] = header
+        if body is not None:
+            payload["body"] = body
+        if color is not None:
+            payload["color"] = color
         self._post_json(url, payload)
+
+    def set_display(self, header: str, body: str) -> None:
+        self.post_ui(header=header, body=body)
+
+    def set_color(self, color: str) -> None:
+        self.post_ui(color=color)
 
     def _post_json(self, url: str, payload: dict) -> None:
         data = json.dumps(payload).encode("utf-8")

@@ -34,4 +34,32 @@ impl<'a> LedController<'a> {
             _ => self.off(),
         }
     }
+
+    /// Updates LEDs from a color string.
+    ///
+    /// - "green" => `set_adding()`
+    /// - "red" => `set_removing()`
+    /// - "" => `off()`
+    /// - anything else => no change
+    ///
+    /// Returns `true` if the input was recognized (including empty string).
+    pub fn update_from_color(&mut self, color: &str) -> bool {
+        let color = color.trim();
+        if color.is_empty() {
+            self.off();
+            return true;
+        }
+
+        match color {
+            "green" | "GREEN" | "Green" => {
+                self.set_adding();
+                true
+            }
+            "red" | "RED" | "Red" => {
+                self.set_removing();
+                true
+            }
+            _ => false,
+        }
+    }
 }
