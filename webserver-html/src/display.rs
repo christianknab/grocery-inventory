@@ -36,7 +36,7 @@ pub struct UiResponse {
 
 pub async fn ui_handler(
     picoserve::extract::State(state): picoserve::extract::State<&'static GlobalAppState>,
-    input: picoserve::extract::Json<UiRequest>,
+    input: picoserve::extract::JsonWithUnescapeBufferSize<UiRequest, 256>,
 ) -> impl IntoResponse {
     let mut updated_anything = false;
 
