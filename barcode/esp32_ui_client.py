@@ -46,6 +46,17 @@ class Esp32UiClient:
         self.config = config or Esp32UiClientConfig.from_env()
         self.logger = logger
 
+    @staticmethod
+    def _normalize_text(s: str) -> str:
+        # Convert literal escape sequences into real line breaks
+        # Sometimes there are two '\'
+        return (
+            s.replace("\\r\\n", "\n")
+            .replace("\\n", "\n")
+            .replace("\r\n", "\n")
+            .replace("\r", "\n")
+        )
+
     def post_ui(
         self,
         *,
@@ -56,9 +67,9 @@ class Esp32UiClient:
         url = f"{self.config.base_url}{self.config.ui_path}"
         payload: dict = {}
         if header is not None:
-            payload["header"] = header
+            payload["header"] = self._normalize_text(header)
         if body is not None:
-            payload["body"] = body
+            payload["body"] = self._normalize_text(body)
         if color is not None:
             payload["color"] = color
         self._post_json(url, payload)
