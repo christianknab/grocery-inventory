@@ -60,7 +60,7 @@ def main():
     # Initialize
     logger.info("Initializing application")
     led = LEDController(insert_pin=16, remove_pin=26)
-    display = DisplayController()
+    display = DisplayController(logger=logger)
     scanner = BarcodeScanner(led_controller=led)
     api_client = BarcodeAPI(api_key=RAPIDAPI_KEY, api_host=RAPIDAPI_HOST)
     database = InventoryDatabase(url=SUPABASE_URL, key=SUPABASE_KEY)
@@ -136,6 +136,7 @@ def main():
                         logger.info(f"Ignoring item: {item['name']}")
                         display.draw_image(scanner.operation, body=f"{item['name']}\n-> Update Manually!")
                         continue
+                    logger.info("Drawing image to update quantity")
                     display.draw_image(scanner.operation, item['name'] + '\nUpdating Quantity...')
                     anylist_updater_queue.add_to_queue(item['anylist_identifier'], 1 if scanner.operation == Operation.INSERT else -1)
                 # No item id found

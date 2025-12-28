@@ -71,6 +71,8 @@ class Esp32UiClient:
 
     def _post_json(self, url: str, payload: dict) -> None:
         data = json.dumps(payload).encode("utf-8")
+        if self.logger:
+            self.logger.debug(f"DEBUG: Sending to {url}: {data}")
         req = urllib.request.Request(
             url,
             data=data,

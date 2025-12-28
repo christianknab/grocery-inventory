@@ -47,12 +47,14 @@ class Esp32HttpDisplayBackend(DisplayBackend):
         logger=None,
     ):
         self._client = client or Esp32UiClient(config=config, logger=logger)
+        self._logger = logger
 
     def clear(self) -> None:
         # Explicit blank header/body.
         self._client.post_ui(header="", body="")
 
     def set_display(self, *, header: Operation | str, body: str) -> None:
+        self._logger.debug("SET DISPLAY", header, body)
         self._client.post_ui(header=_normalize_header(header), body=str(body))
 
 
